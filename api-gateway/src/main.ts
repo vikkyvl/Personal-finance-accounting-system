@@ -2,20 +2,23 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { Transport } from '@nestjs/microservices';
 
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const pack = require('./../package.json');
+
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  app.setGlobalPrefix('api');
+  app.enableCors();
 
   app.connectMicroservice({
     transport: Transport.RMQ,
     options: {
-      urls: ['amqp://rabbitmq:5672'],
-      queue: 'api_gateway_queue',
+      urls: [process.env.BROCKER_URI],
+      queue: pack.name,
       queueOptions: { durable: false },
     },
   });
 
-  await app.startAllMicroservices();
-  await app.listen(3000);
-  console.log('API Gateway is running on http://localhost:3000');
+  await app.listen(process.env.PORT ?? 3000);
 }
 bootstrap();
