@@ -7,9 +7,12 @@ const pack = require('./../package.json');
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  // set global prefix for all routes
   app.setGlobalPrefix('api');
+  // enable cors
   app.enableCors();
 
+  // connect to rabbitmq
   app.connectMicroservice({
     transport: Transport.RMQ,
     options: {

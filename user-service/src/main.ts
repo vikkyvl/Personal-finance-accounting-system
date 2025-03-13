@@ -1,18 +1,28 @@
 import { NestFactory } from '@nestjs/core';
-import { Transport, MicroserviceOptions } from '@nestjs/microservices';
+import { Transport } from '@nestjs/microservices';
+
 import { AppModule } from './app.module';
+import { configService } from './config';
+
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const pack = require('./../package.json');
 
 async function bootstrap() {
-  const app = await NestFactory.createMicroservice<MicroserviceOptions>(AppModule, {
-    transport: Transport.RMQ,
-    options: {
-      urls: ['amqp://rabbitmq:5672'],
-      queue: 'user-service',
-      queueOptions: { durable: false },
-    },
-  });
+  const app = await NestFactory.create(AppModule);
 
-  await app.listen();
-  console.log('User Service is running and connected to RabbitMQ');
+  app.connectMicroservice(
+    {
+      transport: Transport.RMQ,
+      options: {
+        urls: [configService.getBrockerUri()],
+        queue: pack.name,
+        queueOptions: { durable: false },
+      },
+    },
+    { inheritAppConfig: true },
+  );
+
+  await app.startAllMicroservices();
+  await app.listen(configService.getPort());
 }
 bootstrap();
