@@ -1,23 +1,14 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
+import { Controller, Post, Body, Inject } from '@nestjs/common';
+import { ClientProxy } from '@nestjs/microservices';
+import { firstValueFrom } from 'rxjs';
 
-describe('AppController', () => {
-  let appController: AppController;
+@Controller('users')
+export class UserController {
+  constructor(@Inject('USER_SERVICE') private readonly userService: ClientProxy) {}
 
-  beforeEach(async () => {
-    const app: TestingModule = await Test.createTestingModule({
-      controllers: [AppController],
-      providers: [AppService],
-    }).compile();
-
-    appController = app.get<AppController>(AppController);
-  });
-
-  describe('root', () => {
-    it('should return "Hello World!"', () => {
-      expect(appController.getHello()).toBe('Hello World!');
-    });
-  });
-});
+  @Post('register')
+  async registerUser(@Body() data: { username: string; password: string; role: string }) {
+    return firstValueFrom(this.userService.send({ cmd: 'create_user' }, data));
+  }
+}
  

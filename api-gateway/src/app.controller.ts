@@ -1,12 +1,13 @@
-import { Controller, Get } from '@nestjs/common';
-import { AppService } from './app.service';
+import { Controller, Post, Body, Inject } from '@nestjs/common';
+import { ClientProxy } from '@nestjs/microservices';
+import { firstValueFrom } from 'rxjs';
 
-@Controller()
+@Controller('users')
 export class AppController {
-  constructor(private readonly appService: AppService) {}
+  constructor(@Inject('USER_SERVICE') private readonly userService: ClientProxy) {}
 
-  @Get()
-  getHello(): string {
-    return this.appService.getHello();
+  @Post('register')
+  async registerUser(@Body() data: { username: string; password: string; role: string }) {
+    return firstValueFrom(this.userService.send({ cmd: 'create_user' }, data));
   }
 }

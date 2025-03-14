@@ -1,27 +1,26 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
+import { ConfigService } from '@nestjs/config';
 import { Transport } from '@nestjs/microservices';
-
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const pack = require('./../package.json');
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  // set global prefix for all routes
-  app.setGlobalPrefix('api');
-  // enable cors
-  app.enableCors();
+  const configService = app.get(ConfigService);
+  const rabbitMQUrl = configService.get<string>('BROKER_URL');
+  const queueName = configService.get<string>('USER_SERVICE_QUEUE');
+  const port = configService.get<number>('PORT') || 3000;
 
-  // connect to rabbitmq
   app.connectMicroservice({
     transport: Transport.RMQ,
     options: {
-      urls: [process.env.BROCKER_URI],
-      queue: pack.name,
+      urls: [rabbitMQUrl],
+      queue: queueName,
       queueOptions: { durable: false },
     },
   });
 
-  await app.listen(process.env.PORT ?? 3000);
+  await app.startAllMicroservices();
+  await app.listen(port);
+  console.log(`API Gateway is running on http://localhost:${port}`);
 }
 bootstrap();
