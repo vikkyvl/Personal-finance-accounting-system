@@ -1,21 +1,19 @@
 import { NestFactory } from '@nestjs/core';
 import { Transport } from '@nestjs/microservices';
+import { ConfigService } from '@nestjs/config';
 
 import { AppModule } from './app.module';
-import { configService } from './config';
-
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const pack = require('./../package.json');
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  const configService = app.get(ConfigService);
 
   app.connectMicroservice(
     {
       transport: Transport.RMQ,
       options: {
-        urls: [configService.getBrockerUri()],
-        queue: pack.name,
+        urls: [configService.get('BROKER_URI')],
+        queue: configService.get('QUEUE_NAME'),
         queueOptions: { durable: false },
       },
     },
@@ -23,6 +21,7 @@ async function bootstrap() {
   );
 
   await app.startAllMicroservices();
-  await app.listen(configService.getPort());
+  await app.listen(configService.get<number>('PORT') || 4000);
+  console.log(`User Service is running on port ${configService.get<number>('PORT') || 4000}`);
 }
 bootstrap();
