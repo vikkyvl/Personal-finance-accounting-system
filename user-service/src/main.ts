@@ -21,6 +21,8 @@ async function bootstrap() {
   );
 
   await app.startAllMicroservices();
+  console.log('Connected to RabbitMQ');
+
   await app.listen(configService.get<number>('PORT') || 4000);
   console.log(`User Service is running on port ${configService.get<number>('PORT') || 4000}`);
 }

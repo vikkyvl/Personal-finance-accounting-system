@@ -12,20 +12,20 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @MessagePattern(patterns.AUTH.TOKENS)
-  async generateTokens(dto): Promise<Tokens> {
+  async generateTokens(dto: TokenPayload): Promise<Tokens> {
     this.logger.log('Generating tokens');
     return this.authService.generateTokens(dto);
   }
 
   @MessagePattern(patterns.AUTH.VERIFY)
-  async verifyToken(dto): Promise<TokenPayload> {
+  async verifyToken(dto: { token: string }): Promise<TokenPayload> {
     this.logger.log('Verifying token');
-    return this.authService.verifyAccessToken(dto);
+    return this.authService.verifyAccessToken(dto.token);
   }
 
   @MessagePattern(patterns.AUTH.REFRESH)
-  async refreshTokens(dto): Promise<Tokens> {
+  async refreshTokens(dto: { refreshToken: string }): Promise<Tokens> {
     this.logger.log('Refreshing tokens');
-    return this.authService.refreshTokens(dto);
+    return this.authService.refreshTokens(dto.refreshToken);
   }
 }

@@ -14,7 +14,7 @@ export class UserController {
   @MessagePattern(patterns.USER.CREATE)
   async createUser(dto: UserDTO) {
     console.log(dto);
-    this.logger.log('Creating user');
+    this.logger.log(`Creating user: ${JSON.stringify(dto)}`);
     return this.userService.createUser(dto);
   }
 

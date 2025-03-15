@@ -23,7 +23,7 @@ import { OrmModule } from './modules/orm/orm.module';
         synchronize: true, 
       }),
     }),
-    /*ClientsModule.registerAsync([
+    ClientsModule.registerAsync([
       {
         name: 'USER_SERVICE',
         imports: [ConfigModule],
@@ -31,13 +31,13 @@ import { OrmModule } from './modules/orm/orm.module';
         useFactory: (configService: ConfigService) => ({
           transport: Transport.RMQ,
           options: {
-            urls: [configService.get('RABBITMQ_URL')],
+            urls: [configService.get<string>('RABBITMQ_URL')],
             queue: configService.get('QUEUE_NAME'),
             queueOptions: { durable: false },
           },
         }),
       },
-    ]),*/
+    ]),
     UserModule,
     AuthModule,
     OrmModule,
