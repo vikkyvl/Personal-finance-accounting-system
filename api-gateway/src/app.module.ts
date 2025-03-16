@@ -2,25 +2,25 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { AppController } from './app.controller';
+import { AppService } from './app.service';
 
 @Module({
   imports: [
-    ConfigModule.forRoot(), // Додає підтримку `.env` файлу
+    ConfigModule.forRoot(),
     ClientsModule.register([
       {
         name: 'USER_SERVICE',
         transport: Transport.RMQ,
         options: {
-          urls: [process.env.RABBITMQ_URL || 'amqp://localhost:5672'],
-          queue: 'user_queue',
-          queueOptions: {
-            durable: false,
-          },
+          urls: [process.env.BROKER_URL || 'amqp://guest:guest@localhost:5672'],
+          queue: process.env.USER_SERVICE_QUEUE || 'user-service',
+          queueOptions: { durable: false },
         },
       },
     ]),
   ],
   controllers: [AppController],
+  providers: [AppService],
 })
 export class AppModule {}
 
