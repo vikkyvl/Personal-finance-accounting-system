@@ -1,26 +1,25 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { ConfigService } from '@nestjs/config';
-import { Transport } from '@nestjs/microservices';
+import { MicroserviceOptions, Transport } from '@nestjs/microservices';
+import * as dotenv from 'dotenv';
+
+dotenv.config();
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  const configService = app.get(ConfigService);
-  const rabbitMQUrl = configService.get<string>('BROKER_URL');
-  const queueName = configService.get<string>('USER_SERVICE_QUEUE');
-  const port = configService.get<number>('PORT') || 3000;
 
-  app.connectMicroservice({
+  app.connectMicroservice<MicroserviceOptions>({
     transport: Transport.RMQ,
     options: {
-      urls: [rabbitMQUrl],
-      queue: queueName,
+      urls: [process.env.BROKER_URL || 'amqp://guest:guest@localhost:5672'],
+      queue: process.env.USER_SERVICE_QUEUE || 'user-service',
       queueOptions: { durable: false },
     },
   });
 
   await app.startAllMicroservices();
-  await app.listen(port);
-  console.log(`API Gateway is running on http://localhost:${port}`);
+  await app.listen(process.env.PORT || 3000);
+  console.log(`API Gateway is running on port ${process.env.PORT || 3000}`);
 }
+
 bootstrap();
