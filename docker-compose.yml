@@ -7,7 +7,7 @@ services:
     volumes:
       - .:/usr/src/app
     ports:
-      - "3000:3000"
+      - "5000:3000"
     environment:
       - NODE_ENV=development
       - DB_HOST=postgres
@@ -20,23 +20,6 @@ services:
       - postgres
       - rabbitmq
     command: sh -c "npm install && npm start"
-
-  user-service:
-    build:
-      context: ./user-service
-    restart: always
-    depends_on:
-      - postgres
-      - rabbitmq
-    environment:
-      - DB_HOST=postgres
-      - DB_PORT=5432
-      - DB_USERNAME=postgres
-      - DB_PASSWORD=password
-      - DB_NAME=mydb
-      - BROKER_URI=amqp://guest:guest@rabbitmq:5672
-    ports:
-      - "5432:5432"
 
   postgres:
     image: postgres:15
