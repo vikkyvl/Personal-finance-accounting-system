@@ -17,11 +17,19 @@ import { AppService } from './app.service';
           queueOptions: { durable: false },
         },
       },
-    ]),
+    ]),    
   ],
   controllers: [AppController],
   providers: [AppService],
 })
 export class AppModule {}
+/* import { Module } from '@nestjs/common';
+import { AppController } from './app.controller';
+
+@Module({
+  controllers: [AppController],
+})
+export class AppModule {} */
+
 
 

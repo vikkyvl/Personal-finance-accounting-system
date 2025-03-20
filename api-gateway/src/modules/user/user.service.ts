@@ -29,6 +29,11 @@ export class UserService {
     return this.send(patterns.USER.CREATE, dto);
   }
 
+  async login(dto: { email: string; password: string }) {
+    this.logger.log(`Logging in user: ${dto.email}`);
+    return this.send({ cmd: 'login_user' }, dto); 
+  }
+
   async findAllUsers() {
     this.logger.log('Finding all users');
     return this.send(patterns.USER.FIND_ALL, {});

@@ -1,14 +1,12 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { RpcException } from '@nestjs/microservices';
 import { Repository } from 'typeorm';
 import { v4 as uuidv4 } from 'uuid';
 
 import { AuthService } from '../auth/auth.service';
-
 import { UserDTO } from './dto';
 import { User } from '../../entities/user.entity';
-import { Role } from '../../entities/role.entity';
 
 @Injectable()
 export class UserService {
@@ -18,37 +16,53 @@ export class UserService {
     private readonly authService: AuthService,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
-    @InjectRepository(Role)
-    private readonly roleRepository: Repository<Role>,
   ) {}
 
   async createUser(dto: UserDTO) {
     this.logger.log(`Creating user: ${JSON.stringify(dto)}`);
-    const { email, username, role } = dto;
-    const userPassword = uuidv4().slice(0, 8);
 
-    const roleEntity = await this.roleRepository.findOneBy({ name: role });
-    if (!roleEntity) {
-      throw new RpcException(`Role ${role} not found`);
-    }
+    const { email, username, role = 'user' } = dto;  // Default role to 'user'
+    const userPassword = dto.password || uuidv4().slice(0, 8);
 
-    // Remove role from userData and only use role_id
+    console.log('Creating user with role:', role);
+
     const userData = {
-      email,
-      username,
-      password: userPassword,
+        email,
+        username,
+        password: userPassword,
+        role,  // Store role as a string, no separate table
     };
 
-    const $user = this.userRepository.create({
-      ...userData,
-      role_id: roleEntity.id,
-    });
+    console.log('Saving user:', userData);
 
-    const user = await this.userRepository.save($user);
+    const user = this.userRepository.create(userData);
+    await this.userRepository.save(user);
+
+    console.log('User created:', user);
 
     return this.authService.generateTokens({
+        member_id: user.id,
+        role: user.role,
+    });
+  }
+
+  async login(dto: { email: string; password: string }) {
+    this.logger.log(`Attempting login for: ${dto.email}`);
+
+    // Find user by email
+    const user = await this.userRepository.findOne({ where: { email: dto.email } });
+
+    if (!user || user.password !== dto.password) { // Use bcrypt in production
+      this.logger.warn(`Invalid credentials for ${dto.email}`);
+      throw new UnauthorizedException('Invalid email or password');
+    }
+
+    console.log('User authenticated:', user);
+
+    // Generate JWT tokens
+    return this.authService.generateTokens({
       member_id: user.id,
-      role_id: user.role_id,
+      role: user.role,
     });
   }
 
@@ -66,17 +80,9 @@ export class UserService {
       throw new RpcException('User not found');
     }
 
-    const roleEntity = await this.roleRepository.findOneBy({ name: dto.role });
-    if (!roleEntity) {
-      throw new NotFoundException(`Role ${dto.role} not found`);
-    }
-
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { role: _, ...updateData } = dto;
     return this.userRepository.save({
       ...user,
-      ...updateData,
-      role_id: roleEntity.id,
+      ...dto,
     });
   }
 
@@ -100,3 +106,4 @@ export class UserService {
     return this.userRepository.save({ ...user, password: '123456' });
   }
 }
+

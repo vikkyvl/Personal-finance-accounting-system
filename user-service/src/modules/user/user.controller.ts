@@ -1,50 +1,76 @@
-import { Logger, Controller } from '@nestjs/common';
+/* import { Logger, Controller } from '@nestjs/common';
 import { MessagePattern } from '@nestjs/microservices';
 
 import { UserService } from './user.service';
 import { UserDTO } from './dto';
-import { patterns } from '../patterns';
 
-@Controller('user')
+@Controller()
 export class UserController {
   private readonly logger = new Logger(UserController.name);
 
   constructor(private readonly userService: UserService) {}
 
-  @MessagePattern(patterns.USER.CREATE)
+  @MessagePattern({ cmd: 'create_user' })
   async createUser(dto: UserDTO) {
-    console.log(dto);
-    this.logger.log(`Creating user: ${JSON.stringify(dto)}`);
+    console.log('Received user creation request:', dto);
+    this.logger.log(`Processing user creation for: ${JSON.stringify(dto)}`);
     return this.userService.createUser(dto);
   }
 
-  @MessagePattern(patterns.USER.FIND_ALL)
+  @MessagePattern({ cmd: 'find_all_users' })
   async findAllUsers() {
     return this.userService.findAllUsers();
   }
 
-  @MessagePattern(patterns.USER.FIND_BY_ID)
+  @MessagePattern({ cmd: 'find_user_by_id' })
   async findUserById(id: string) {
     return this.userService.findUserById(id);
   }
 
-  @MessagePattern(patterns.USER.UPDATE)
+  @MessagePattern({ cmd: 'update_user' })
   async updateUser(id: string, dto: UserDTO) {
     return this.userService.updateUser(id, dto);
   }
 
-  @MessagePattern(patterns.USER.DELETE)
+  @MessagePattern({ cmd: 'delete_user' })
   async deleteUser(id: string) {
     return this.userService.deleteUser(id);
   }
 
-  @MessagePattern(patterns.USER.FIND_BY_EMAIL)
+  @MessagePattern({ cmd: 'find_user_by_email' })
   async findUserByEmail(email: string) {
     return this.userService.findUserByEmail(email);
   }
 
-  @MessagePattern(patterns.USER.RESET_PASSWORD)
+  @MessagePattern({ cmd: 'reset_password' })
   async resetPassword(email: string) {
     return this.userService.resetPassword(email);
   }
-}
+} */
+  import { Logger, Controller } from '@nestjs/common';
+  import { MessagePattern } from '@nestjs/microservices';
+  
+  import { UserService } from './user.service';
+  import { UserDTO } from './dto';
+  
+  @Controller() 
+  export class UserController {
+    private readonly logger = new Logger(UserController.name);
+  
+    constructor(private readonly userService: UserService) {}
+  
+    @MessagePattern({ cmd: 'create_user' }) 
+    async createUser(dto: UserDTO) {
+      console.log('User-service received create_user request:', dto);
+      this.logger.log(`Processing user creation for: ${JSON.stringify(dto)}`);
+      return this.userService.createUser(dto);
+    }
+
+    @MessagePattern({ cmd: 'login_user' })  
+    async loginUser(dto: { email: string; password: string }) {
+      console.log('Received login request:', dto);
+      return this.userService.login(dto);
+    }
+  }
+  
+  

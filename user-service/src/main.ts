@@ -1,7 +1,6 @@
 import { NestFactory } from '@nestjs/core';
 import { Transport } from '@nestjs/microservices';
 import { ConfigService } from '@nestjs/config';
-
 import { AppModule } from './app.module';
 
 async function bootstrap() {
@@ -13,7 +12,7 @@ async function bootstrap() {
       transport: Transport.RMQ,
       options: {
         urls: [configService.get('BROKER_URI')],
-        queue: configService.get('QUEUE_NAME'),
+        queue: configService.get('USER_SERVICE_QUEUE'),
         queueOptions: { durable: false },
       },
     },
@@ -21,9 +20,11 @@ async function bootstrap() {
   );
 
   await app.startAllMicroservices();
-  console.log('Connected to RabbitMQ');
+  console.log('User-service is listening for messages on RabbitMQ');
+  console.log(`Connected to queue: ${configService.get('USER_SERVICE_QUEUE')}`);
 
   await app.listen(configService.get<number>('PORT') || 4000);
   console.log(`User Service is running on port ${configService.get<number>('PORT') || 4000}`);
 }
 bootstrap();
+

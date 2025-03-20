@@ -13,7 +13,7 @@ import { UserService } from './user.service';
         ClientProxyFactory.create({
           transport: Transport.RMQ,
           options: {
-            urls: [process.env.BROCKER_URI],
+            urls: [process.env.BROKER_URL],
             queue: 'user-service',
             queueOptions: { durable: false },
           },
