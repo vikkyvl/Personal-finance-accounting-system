@@ -1,6 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn } from 'typeorm';
 
-@Entity('users')  // Ensure correct table name
+@Entity('users') 
 export class User {
   @PrimaryGeneratedColumn('uuid')
   id: string;
@@ -14,7 +14,7 @@ export class User {
   @Column({ type: 'varchar', length: 255 })
   password: string;
 
-  @Column({ type: 'varchar', length: 50, default: 'user' })  // Store role in users table
+  @Column({ type: 'varchar', length: 50, default: 'user' })  
   role: string;
 
   @CreateDateColumn({ type: 'timestamp' })

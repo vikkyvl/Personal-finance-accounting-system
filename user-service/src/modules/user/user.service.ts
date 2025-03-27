@@ -21,7 +21,7 @@ export class UserService {
   async createUser(dto: UserDTO) {
     this.logger.log(`Creating user: ${JSON.stringify(dto)}`);
 
-    const { email, username, role = 'user' } = dto;  // Default role to 'user'
+    const { email, username, role = 'user' } = dto; 
     const userPassword = dto.password || uuidv4().slice(0, 8);
 
     console.log('Creating user with role:', role);
@@ -30,7 +30,7 @@ export class UserService {
         email,
         username,
         password: userPassword,
-        role,  // Store role as a string, no separate table
+        role,  
     };
 
     console.log('Saving user:', userData);
@@ -49,17 +49,15 @@ export class UserService {
   async login(dto: { email: string; password: string }) {
     this.logger.log(`Attempting login for: ${dto.email}`);
 
-    // Find user by email
     const user = await this.userRepository.findOne({ where: { email: dto.email } });
 
-    if (!user || user.password !== dto.password) { // Use bcrypt in production
+    if (!user || user.password !== dto.password) { 
       this.logger.warn(`Invalid credentials for ${dto.email}`);
       throw new UnauthorizedException('Invalid email or password');
     }
 
     console.log('User authenticated:', user);
 
-    // Generate JWT tokens
     return this.authService.generateTokens({
       member_id: user.id,
       role: user.role,
