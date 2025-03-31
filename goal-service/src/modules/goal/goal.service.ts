@@ -28,9 +28,12 @@ export class GoalService {
     if (!goal) {
       throw new NotFoundException(`Goal with ID ${id} not found`);
     }
-
+  
     const updatedGoal = this.goalRepository.merge(goal, dto);
-    return await this.goalRepository.save(updatedGoal);
+    await this.goalRepository.save(updatedGoal);
+  
+
+    return updatedGoal;
   }
 
   async updateCurrentAmount(userId: string, amountToAdd: number): Promise<void> {

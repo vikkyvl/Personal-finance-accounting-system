@@ -3,10 +3,14 @@ import { ConfigModule } from '@nestjs/config';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { TransactionModule } from './modules/transaction/transaction.module';
+import { GoalModule } from './modules/goal/goal.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot(),
+    TransactionModule,
+    GoalModule,
     ClientsModule.register([
       {
         name: 'USER_SERVICE',
@@ -17,7 +21,7 @@ import { AppService } from './app.service';
           queueOptions: { durable: false },
         },
       },
-    ]),    
+    ]),       
   ],
   controllers: [AppController],
   providers: [AppService],
