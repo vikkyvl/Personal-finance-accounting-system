@@ -1,14 +1,4 @@
-import {
-  Controller,
-  Post,
-  Body,
-  Get,
-  Param,
-  Query,
-  Delete,
-  HttpCode,
-  HttpStatus,
-} from '@nestjs/common';
+import { Controller, Post, Body, Get, Param, Query, Delete, HttpCode, HttpStatus } from '@nestjs/common';
 import { MessagePattern } from '@nestjs/microservices';
 import { TransactionService } from './transaction.service';
 import { TransactionDTO } from './dto/transaction.dto';
@@ -16,8 +6,6 @@ import { TransactionDTO } from './dto/transaction.dto';
 @Controller('transactions')
 export class TransactionController {
   constructor(private readonly transactionService: TransactionService) {}
-
-  // ---------------- HTTP ----------------
 
   @Post()
   async createTransactionHttp(@Body() dto: TransactionDTO) {
@@ -51,8 +39,6 @@ export class TransactionController {
   async deleteTransaction(@Param('id') id: string) {
     await this.transactionService.deleteTransaction(id);
   }
-
-  // ---------------- RMQ (RabbitMQ) ----------------
 
   @MessagePattern({ cmd: 'create_transaction' })
   async createTransactionRMQ(dto: TransactionDTO) {

@@ -12,9 +12,12 @@ class ConfigService {
   public getBrockerUri() {
     return process.env.BROKER_URI ?? 'amqp://guest:guest@127.0.0.1:5672';
   }
-//TODO: public getJWT
-  public getPort(): number {
-    return Number(process.env.PORT) || 3001;
+
+  public getJWT() {
+    return {
+      secret: process.env.JWT_SECRET || 'access_secret',
+      expiresIn: process.env.JWT_EXPIRES_IN || '3600s',
+    };
   }
 
   public getDatabaseName(): string {
