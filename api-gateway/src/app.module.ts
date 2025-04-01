@@ -21,7 +21,25 @@ import { GoalModule } from './modules/goal/goal.module';
           queueOptions: { durable: false },
         },
       },
-    ]),       
+      {
+        name: 'TRANSACTION_SERVICE',
+        transport: Transport.RMQ,
+        options: {
+          urls: [process.env.BROKER_URL || 'amqp://guest:guest@localhost:5672'],
+          queue: process.env.TRANSACTION_SERVICE_QUEUE || 'transaction-service',
+          queueOptions: { durable: false },
+        },
+      },
+      {
+        name: 'GOAL_SERVICE',
+        transport: Transport.RMQ,
+        options: {
+          urls: [process.env.BROKER_URL || 'amqp://guest:guest@localhost:5672'],
+          queue: process.env.GOAL_SERVICE_QUEUE || 'goal-service',
+          queueOptions: { durable: false },
+        },
+      },
+    ]),           
   ],
   controllers: [AppController],
   providers: [AppService],

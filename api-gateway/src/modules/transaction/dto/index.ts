@@ -1,1 +1,4 @@
-export * from './transaction';
+import { Transaction } from './transaction';
+
+export { Transaction };
+

@@ -1,14 +1,21 @@
-import { Controller, Post, Body, Get, Param, Put } from '@nestjs/common';
-import { GoalService } from './goal.service';
-import { CreateGoalDto } from './dto/goal';
+import { 
+    Controller, 
+    Post, 
+    Body, 
+    Get, 
+    Param, 
+    Put 
+  } from '@nestjs/common';
+  import { GoalService } from './goal.service';
+  import { Goal } from './dto/goal';
 
 @Controller('goals')
 export class GoalController {
   constructor(private readonly goalService: GoalService) {}
 
   @Post()
-  async create(@Body() data: CreateGoalDto) {
-    return this.goalService.createGoal(data); // ✅ використовуємо сервіс, а не ClientProxy напряму
+  async create(@Body() data: Goal) {
+    return this.goalService.createGoal(data); 
   }
 
   @Get(':userId')
@@ -17,7 +24,7 @@ export class GoalController {
   }
 
   @Put(':id')
-  async update(@Param('id') id: string, @Body() update: Partial<CreateGoalDto>) {
+  async update(@Param('id') id: string, @Body() update: Partial<Goal>) {
     return this.goalService.updateGoal(id, update);
   }
 }
