@@ -19,12 +19,12 @@ export class UserService {
   ) {}
 
   async createUser(dto: UserDTO) {
-    this.logger.log(`Creating user: ${JSON.stringify(dto)}`);
+    //this.logger.log(`Creating user: ${JSON.stringify(dto)}`);
 
     const { email, username, role = 'user' } = dto; 
     const userPassword = dto.password || uuidv4().slice(0, 8);
 
-    console.log('Creating user with role:', role);
+    //console.log('Creating user with role:', role);
 
     const userData = {
         email,
@@ -33,12 +33,12 @@ export class UserService {
         role,  
     };
 
-    console.log('Saving user:', userData);
+    //console.log('Saving user:', userData);
 
     const user = this.userRepository.create(userData);
     await this.userRepository.save(user);
 
-    console.log('User created:', user);
+    //console.log('User created:', user);
 
     return this.authService.generateTokens({
         member_id: user.id,
@@ -56,16 +56,12 @@ export class UserService {
       throw new UnauthorizedException('Invalid email or password');
     }
 
-    console.log('User authenticated:', user);
+    //console.log('User authenticated:', user);
 
     return this.authService.generateTokens({
       member_id: user.id,
       role: user.role,
     });
-  }
-
-  async findAllUsers() {
-    return this.userRepository.find();
   }
 
   async findUserById(id: string) {
