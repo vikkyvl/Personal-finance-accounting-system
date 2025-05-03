@@ -1,0 +1,57 @@
+.topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 2rem;
+    background-color: #ffffff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.topbar-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #0099cc;
+}
+
+.topbar-nav {
+    display: flex;
+    gap: 1.5rem;
+}
+
+.topbar-nav a {
+    text-decoration: none;
+    color: #333;
+    font-weight: 500;
+}
+
+.topbar-nav a.active {
+    color: #0099cc;
+    border-bottom: 2px solid #0099cc;
+}
+
+.topbar-user {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    font-size: 0.9rem;
+}
+
+.logout-button {
+    background-color: #ff4d4d;
+    color: #fff;
+    border: none;
+    padding: 0.4rem 0.8rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background-color 0.2s ease-in-out;
+}
+
+.logout-button:hover {
+    background-color: #cc0000;
+}
+
+

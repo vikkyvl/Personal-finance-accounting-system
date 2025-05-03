@@ -1,50 +1,45 @@
 import { useState } from 'react';
-import { useAuth } from '../context/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
 import { api } from '../api/axios';
 import '../styles/Auth.css';
 
-const Login = () => {
-    const { login } = useAuth();
+const Register = () => {
     const navigate = useNavigate();
-
+    const [username, setUsername] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
 
-    const handleLogin = async () => {
-        if (!email || !password) {
-            setError('Please enter email and password');
+    const handleRegister = async () => {
+        if (!username || !email || !password) {
+            setError('Please fill in all fields');
             return;
         }
 
         try {
-            const res = await api.post('/users/login', { email, password });
-
-            const { accessToken, userId } = res.data;
-
-            if (!accessToken || !userId) {
-                setError('No accessToken or userId received');
-                return;
-            }
-
-            login(accessToken);
-            localStorage.setItem('email', email);
-            localStorage.setItem('userId', userId);
-
-            navigate('/dashboard');
+            await api.post('/users/register', { username, email, password });
+            navigate('/login');
         } catch (err: any) {
-            console.error('Login error:', err);
+            console.error('Register error:', err);
             const message =
                 err.response?.data?.message ||
-                (err.code === 'ERR_NETWORK' ? 'Network Error — check API connection' : 'Login failed');
+                (err.code === 'ERR_NETWORK' ? 'Network Error — check API' : 'Internal server error');
             setError(message);
         }
     };
 
     return (
         <div className="auth-container">
-            <h2>Login</h2>
+            <h2>Register</h2>
+            <input
+                type="text"
+                placeholder="Username"
+                value={username}
+                onChange={e => {
+                    setUsername(e.target.value);
+                    setError('');
+                }}
+            />
             <input
                 type="email"
                 placeholder="Email"
@@ -63,19 +58,15 @@ const Login = () => {
                     setError('');
                 }}
             />
-            <button onClick={handleLogin}>Login</button>
-            {error && <p className="error">{error}</p>}
-            <p className="toggle-auth">
-                Don’t have an account? <Link to="/register">Register</Link>
+            <button onClick={handleRegister}>Register</button>
+            {error && <p className="auth-error">{error}</p>}
+            <p>
+                Already have an account? <Link to="/login">Login</Link>
             </p>
         </div>
     );
 };
 
-export default Login;
-
-
-
-
+export default Register;
 
 

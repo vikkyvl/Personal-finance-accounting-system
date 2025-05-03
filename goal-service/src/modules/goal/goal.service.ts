@@ -7,8 +7,8 @@ import { GoalDTO } from './dto/goal.dto';
 @Injectable()
 export class GoalService {
   constructor(
-    @InjectRepository(Goal)
-    private readonly goalRepository: Repository<Goal>,
+      @InjectRepository(Goal)
+      private readonly goalRepository: Repository<Goal>,
   ) {}
 
   async createGoal(dto: GoalDTO): Promise<Goal> {
@@ -28,10 +28,10 @@ export class GoalService {
     if (!goal) {
       throw new NotFoundException(`Goal with ID ${id} not found`);
     }
-  
+
     const updatedGoal = this.goalRepository.merge(goal, dto);
     await this.goalRepository.save(updatedGoal);
-  
+
 
     return updatedGoal;
   }

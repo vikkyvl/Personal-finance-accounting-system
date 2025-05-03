@@ -25,7 +25,7 @@ export class GoalController {
 
   @Put(':id')
   async update(@Param('id') id: string, @Body() update: Partial<Goal>) {
-    return this.goalService.updateGoal(id, update);
+     return this.goalService.updateGoal(id, update);
   }
 }
 

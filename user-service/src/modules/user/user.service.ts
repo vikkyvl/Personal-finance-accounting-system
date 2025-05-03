@@ -51,18 +51,22 @@ export class UserService {
 
     const user = await this.userRepository.findOne({ where: { email: dto.email } });
 
-    if (!user || user.password !== dto.password) { 
+    if (!user || user.password !== dto.password) {
       this.logger.warn(`Invalid credentials for ${dto.email}`);
       throw new UnauthorizedException('Invalid email or password');
     }
 
-    //console.log('User authenticated:', user);
-
-    return this.authService.generateTokens({
+    const tokens = await this.authService.generateTokens({
       member_id: user.id,
       role: user.role,
     });
+
+    return {
+      ...tokens,
+      userId: user.id,
+    };
   }
+
 
   async findUserById(id: string) {
     return this.userRepository.findOne({ where: { id } });

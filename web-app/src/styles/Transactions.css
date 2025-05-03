@@ -1,0 +1,114 @@
+.transactions-wrapper {
+    min-height: 100vh;
+    background-color: #f5f9fc;
+    font-family: 'Segoe UI', sans-serif;
+}
+
+.transactions-main {
+    flex: 1;
+    padding: 2rem;
+    background-color: #fff;
+    border-radius: 16px;
+    margin: 2rem;
+    box-shadow: 0 0 12px rgba(0, 0, 0, 0.05);
+}
+
+.transactions-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.transactions-header h2 {
+    font-size: 1.8rem;
+    color: #2b2d42;
+}
+
+.transactions-header button {
+    padding: 0.6rem 1.2rem;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.form-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    background-color: #eef2f7;
+    padding: 1rem;
+    border-radius: 12px;
+}
+
+.form-container input,
+.form-container select {
+    flex: 1 1 200px;
+    padding: 0.5rem;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+}
+
+.form-container button {
+    padding: 0.5rem 1rem;
+    background-color: #28a745;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.error {
+    color: red;
+    margin-top: 0.5rem;
+}
+
+.table-container table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+    background-color: #ffffff;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 0 6px rgba(0, 0, 0, 0.05);
+}
+
+.table-container th,
+.table-container td {
+    padding: 0.8rem;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+.table-container th {
+    background-color: #f0f4f8;
+    color: #333;
+}
+
+.table-container td.income {
+    color: #28a745;
+    font-weight: 600;
+}
+
+.table-container td.expense {
+    color: #dc3545;
+    font-weight: 600;
+}
+
+.filter-bar {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.filter-bar select,
+.filter-bar input {
+    padding: 0.5rem;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+}
+
