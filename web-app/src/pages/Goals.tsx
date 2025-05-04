@@ -78,7 +78,7 @@ const Goals = () => {
 
         try {
             await api.put(`/goals/${goal.id}`, {
-                current_amount: goal.current_amount + actualAmount,
+                current_amount: Number(goal.current_amount) + actualAmount,
             });
 
             await api.post('/transactions', {

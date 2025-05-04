@@ -42,7 +42,7 @@ export class GoalService {
     for (const goal of goals) {
       if (goal.status !== 'in_progress') continue;
 
-      goal.current_amount += amountToAdd;
+      goal.current_amount = Number(goal.current_amount) + amountToAdd;
 
       if (goal.current_amount >= goal.target_amount) {
         goal.status = 'completed';
