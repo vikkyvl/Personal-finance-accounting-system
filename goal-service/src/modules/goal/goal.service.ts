@@ -13,6 +13,13 @@ export class GoalService {
 
   async createGoal(dto: GoalDTO): Promise<Goal> {
     const goal = this.goalRepository.create(dto);
+
+    const deadlineDate = new Date(goal.deadline);
+    const today = new Date();
+    if (deadlineDate < today) {
+        goal.status = 'failed';
+    }
+    
     return await this.goalRepository.save(goal);
   }
 
@@ -26,12 +33,24 @@ export class GoalService {
   async updateGoal(id: string, dto: Partial<GoalDTO>): Promise<Goal> {
     const goal = await this.goalRepository.findOne({ where: { id } });
     if (!goal) {
-      throw new NotFoundException(`Goal with ID ${id} not found`);
+        throw new NotFoundException(`Goal with ID ${id} not found`);
     }
 
     const updatedGoal = this.goalRepository.merge(goal, dto);
-    await this.goalRepository.save(updatedGoal);
 
+    const deadlineDate = new Date(updatedGoal.deadline);
+    const today = new Date();
+
+    const currentAmount = Number(updatedGoal.current_amount);
+    const targetAmount = Number(updatedGoal.target_amount);
+
+    if (currentAmount >= targetAmount) {
+        updatedGoal.status = 'completed';
+    } else if (deadlineDate < today && currentAmount < targetAmount) {
+        updatedGoal.status = 'failed';
+    }
+
+    await this.goalRepository.save(updatedGoal);
 
     return updatedGoal;
   }

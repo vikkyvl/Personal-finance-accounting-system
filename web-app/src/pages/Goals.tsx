@@ -16,7 +16,7 @@ interface Goal {
 const Goals = () => {
     const [goals, setGoals] = useState<Goal[]>([]);
     const [goalName, setGoalName] = useState('');
-    const [targetAmount, setTargetAmount] = useState<number>(0);
+    const [targetAmount, setTargetAmount] = useState<string>('');
     const [deadline, setDeadline] = useState('');
     const [progressInputs, setProgressInputs] = useState<Record<string, number>>({});
     const [expanded, setExpanded] = useState<Record<string, boolean>>({
@@ -34,27 +34,48 @@ const Goals = () => {
     const fetchGoals = async () => {
         try {
             const res = await api.get(`/goals/${userId}`);
-            setGoals(res.data);
+    
+            const updatedGoals = res.data.map((goal: Goal) => {
+                const deadlineDate = new Date(goal.deadline);
+                const today = new Date();
+    
+                const currentAmount = Number(goal.current_amount);
+                const targetAmount = Number(goal.target_amount);
+    
+                if (currentAmount >= targetAmount) {
+                    return { ...goal, status: 'completed' };
+                }
+    
+                if (deadlineDate < today && currentAmount < targetAmount) {
+                    return { ...goal, status: 'failed' };
+                }
+    
+                return goal;
+            });
+    
+            setGoals(updatedGoals);
         } catch (err) {
             console.error('Error fetching goals:', err);
         }
     };
 
     const createGoal = async () => {
-        if (!goalName.trim() || targetAmount <= 0 || !deadline) {
+        const amount = Number(targetAmount);
+    
+        if (!goalName.trim() || amount <= 0 || !deadline) {
             alert('Please fill in all fields correctly!');
             return;
         }
-
+    
         try {
             await api.post('/goals', {
                 user_id: userId,
                 goal_name: goalName,
-                target_amount: targetAmount,
+                target_amount: amount,
                 deadline,
             });
             setGoalName('');
-            setTargetAmount(0);
+            setTargetAmount('0');
             setDeadline('');
             fetchGoals();
         } catch (err) {
@@ -162,7 +183,17 @@ const Goals = () => {
                         type="number"
                         placeholder="Target amount"
                         value={targetAmount}
-                        onChange={e => setTargetAmount(Number(e.target.value))}
+                        onChange={e => setTargetAmount(e.target.value)}
+                        onFocus={() => {
+                            if (targetAmount === '0') {
+                                setTargetAmount('');
+                            }
+                        }}
+                        onBlur={() => {
+                            if (targetAmount === '') {
+                                setTargetAmount('0');
+                            }
+                        }}
                     />
                     <input
                         type="date"
