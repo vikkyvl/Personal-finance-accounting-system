@@ -63,4 +63,12 @@ export class UserService {
     this.logger.log(`Resetting password for user by email: ${email}`);
     return this.send(patterns.USER.RESET_PASSWORD, { email });
   }
+
+  async resetRequest(email: string) {
+    return this.send({ cmd: 'request_password_reset' }, email);
+  }
+
+  async confirmPasswordResetByToken(token: string, newPassword: string) {
+    return this.send({ cmd: 'reset_password_confirm' }, { token, newPassword });
+  }
 }

@@ -71,6 +71,16 @@ export class UserController {
     console.log('Received login request:', dto);
     return this.userService.login(dto);
   }
+
+  @MessagePattern({ cmd: 'request_password_reset' })
+  async requestPasswordReset(email: string) {
+    return this.userService.requestPasswordReset(email);
+  }
+
+  @MessagePattern({ cmd: 'reset_password_confirm' })
+  async resetPasswordConfirm(dto: { token: string; newPassword: string }) {
+    return this.userService.resetPasswordConfirm(dto.token, dto.newPassword);
+  }
 }
 
 

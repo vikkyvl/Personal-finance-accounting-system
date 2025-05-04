@@ -68,6 +68,11 @@ const Login = () => {
             <p className="toggle-auth">
                 Don’t have an account? <Link to="/register">Register</Link>
             </p>
+            <p className="toggle-auth">
+                Forgot your password?
+                <Link to="/forgot-password"> Reset it</Link>
+            </p>
+
         </div>
     );
 };

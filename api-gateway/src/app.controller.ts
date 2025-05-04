@@ -25,7 +25,21 @@ export class AppController {
   async login(@Body() loginDto: { email: string; password: string }) {
     console.log('Forwarding login request to user-service:', loginDto);
     return this.userService.send({ cmd: 'login_user' }, loginDto).toPromise();
-  } 
+  }
+
+  @Post('reset-request')
+  async resetRequest(@Body() body: { email: string }) {
+    console.log('Sending reset request for email:', body.email);
+    return this.userService.send({ cmd: 'request_password_reset' }, body.email).toPromise();
+  }
+
+  @Post('reset-confirm')
+  async resetConfirm(@Body() body: { token: string; newPassword: string }) {
+    console.log('Confirming password reset with token:', body.token);
+    return this.userService
+        .send({ cmd: 'reset_password_confirm' }, { token: body.token, newPassword: body.newPassword })
+        .toPromise();
+  }
 }
   
   

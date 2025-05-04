@@ -35,5 +35,16 @@ export class UserController {
   getProfile(@Request() req) {
     return req.user;
   }
+
+  @Post('reset-request')
+  async resetRequest(@Body() body: { email: string }) {
+    return this.userService.resetRequest(body.email);
+  }
+
+  @Post('reset-confirm')
+  async resetConfirm(@Body() body: { token: string; newPassword: string }) {
+    return this.userService.confirmPasswordResetByToken(body.token, body.newPassword);
+  }
+
 }
 
