@@ -85,3 +85,77 @@ body {
     width: 100%;
     max-width: 640px;
 }
+
+.custom-legend {
+    margin-top: 1rem;
+    display: flex;
+    gap: 2rem; 
+    justify-content: center;
+    flex-wrap: wrap; 
+}
+
+.legend-column {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    min-width: 120px; 
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    font-size: 0.95rem;
+    color: #333;
+}
+
+.legend-color {
+    width: 16px;
+    height: 16px;
+    display: inline-block;
+    margin-right: 0.5rem;
+    border-radius: 3px;
+}
+
+.last-spendings {
+    margin-top: 2rem;
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+}
+
+.last-spendings h4 {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #00bcd4;
+    margin-bottom: 1rem;
+}
+
+.spendings-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+}
+
+.spending-item {
+    display: flex;
+    align-items: center;
+    width: calc(50% - 0.75rem); /* 2 items per row */
+}
+
+.spending-icon {
+    width: 40px;
+    height: 40px;
+    margin-right: 0.75rem;
+}
+
+.spending-name {
+    font-weight: 500;
+    margin: 0;
+}
+
+.spending-amount {
+    margin: 0;
+    color: #555;
+    font-size: 0.95rem;
+}

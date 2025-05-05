@@ -8,6 +8,13 @@ import {
     BarChart, Bar
 } from 'recharts';
 import Topbar from '../components/Topbar';
+import { ResponsiveContainer } from 'recharts';
+import SalaryIcon from '../icons/Salary.svg';
+import EntertainmentIcon from '../icons/Entertainment.svg';
+import GroceriesIcon from '../icons/Groceries.svg';
+import HealthIcon from '../icons/Health.svg';
+import UtilitiesIcon from '../icons/Utilities.svg';
+import TransportIcon from '../icons/Transport.svg';
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
 
@@ -98,7 +105,7 @@ const Dashboard = () => {
                 </header>
 
                 <section className="charts-section">
-                    <div className="chart-box">
+                                    <div className="chart-box">
                         <h4>Spendings</h4>
                         <PieChart width={250} height={250}>
                             <Pie data={categories} dataKey="amount" nameKey="category" outerRadius={80} label>
@@ -107,6 +114,34 @@ const Dashboard = () => {
                                 ))}
                             </Pie>
                         </PieChart>
+
+                        <div className="custom-legend">
+                            <div className="legend-column">
+                                {categories.slice(0, Math.ceil(categories.length / 2)).map((entry, index) => (
+                                    <div key={`item-left-${index}`} className="legend-item">
+                                        <span
+                                            className="legend-color"
+                                            style={{ backgroundColor: COLORS[index % COLORS.length] }}
+                                        ></span>
+                                        <span className="legend-text">{entry.category}</span>
+                                    </div>
+                                ))}
+                            </div>
+                            <div className="legend-column">
+                                {categories.slice(Math.ceil(categories.length / 2)).map((entry, index) => {
+                                    const colorIndex = index + Math.ceil(categories.length / 2);
+                                    return (
+                                        <div key={`item-right-${index}`} className="legend-item">
+                                            <span
+                                                className="legend-color"
+                                                style={{ backgroundColor: COLORS[colorIndex % COLORS.length] }}
+                                            ></span>
+                                            <span className="legend-text">{entry.category}</span>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </div>
                     </div>
 
                     <div className="chart-box">
@@ -129,13 +164,63 @@ const Dashboard = () => {
 
                     <div className="chart-box">
                         <h4>Income Source</h4>
-                        <BarChart width={400} height={250} data={sources}>
-                            <XAxis dataKey="category" />
-                            <YAxis />
-                            <Tooltip />
-                            <Legend />
-                            <Bar dataKey="amount" fill="#8884d8" />
-                        </BarChart>
+                        <ResponsiveContainer width="100%" height={250}>
+                            <BarChart data={sources}>
+                                <XAxis dataKey="category" />
+                                <YAxis />
+                                <Tooltip />
+                                <Legend />
+                                <Bar dataKey="amount" fill="#8884d8" />
+                            </BarChart>
+                        </ResponsiveContainer>
+                    </div>
+                </section>
+
+                <section className="last-spendings">
+                    <h4>Last Spendings</h4>
+                    <div className="spendings-list">
+                        <div className="spending-item">
+                            <img src={SalaryIcon} alt="Salary" className="spending-icon" />
+                            <div>
+                                <p className="spending-name">Salary</p>
+                                <p className="spending-amount">$2400.00</p>
+                            </div>
+                        </div>
+                        <div className="spending-item">
+                            <img src={EntertainmentIcon} alt="Entertainment" className="spending-icon" />
+                            <div>
+                                <p className="spending-name">Entertainment</p>
+                                <p className="spending-amount">$150.00</p>
+                            </div>
+                        </div>
+                        <div className="spending-item">
+                            <img src={GroceriesIcon} alt="Groceries" className="spending-icon" />
+                            <div>
+                                <p className="spending-name">Groceries</p>
+                                <p className="spending-amount">$95.00</p>
+                            </div>
+                        </div>
+                        <div className="spending-item">
+                            <img src={HealthIcon} alt="Health" className="spending-icon" />
+                            <div>
+                                <p className="spending-name">Health</p>
+                                <p className="spending-amount">$200.00</p>
+                            </div>
+                        </div>
+                        <div className="spending-item">
+                            <img src={UtilitiesIcon} alt="Utilities" className="spending-icon" />
+                            <div>
+                                <p className="spending-name">Utilities</p>
+                                <p className="spending-amount">$120.00</p>
+                            </div>
+                        </div>
+                        <div className="spending-item">
+                            <img src={TransportIcon} alt="Transport" className="spending-icon" />
+                            <div>
+                                <p className="spending-name">Transport</p>
+                                <p className="spending-amount">$50.00</p>
+                            </div>
+                        </div>
                     </div>
                 </section>
             </main>

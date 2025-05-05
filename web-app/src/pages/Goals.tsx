@@ -24,6 +24,10 @@ const Goals = () => {
         completed: false,
         failed: false,
     });
+    const [editingGoal, setEditingGoal] = useState<Goal | null>(null);
+    const [editGoalName, setEditGoalName] = useState('');
+    const [editTargetAmount, setEditTargetAmount] = useState('');
+    const [editDeadline, setEditDeadline] = useState('');
 
     const userId = localStorage.getItem('userId');
 
@@ -122,6 +126,31 @@ const Goals = () => {
         }
     };
 
+    const startEditingGoal = (goal: Goal) => {
+        setEditingGoal(goal);
+        setEditGoalName(goal.goal_name);
+        setEditTargetAmount(String(goal.target_amount));
+        setEditDeadline(goal.deadline.split('T')[0]); 
+    };
+
+    const saveEditedGoal = async () => {
+        if (!editingGoal) return;
+    
+        const updatedGoal = {
+            goal_name: editGoalName,
+            target_amount: Number(editTargetAmount),
+            deadline: editDeadline,
+        };
+    
+        try {
+            await api.put(`/goals/${editingGoal.id}`, updatedGoal);
+            setEditingGoal(null);
+            fetchGoals();
+        } catch (err) {
+            console.error('Error updating goal:', err);
+        }
+    };
+    
     const toggleSection = (status: string) => {
         setExpanded(prev => ({ ...prev, [status]: !prev[status] }));
     };
@@ -158,6 +187,12 @@ const Goals = () => {
                                     }
                                 >
                                     Fund Goal
+                                </button>
+                                <button
+                                    className="goal-edit-btn"
+                                    onClick={() => startEditingGoal(goal)}
+                                >
+                                    Edit Goal
                                 </button>
                             </div>
                         )}
@@ -211,6 +246,41 @@ const Goals = () => {
                     {renderGoals('failed')}
                 </div>
             </div>
+            {editingGoal && (
+                <div className="modal-backdrop">
+                    <div className="edit-goal-form">
+                        <h3>Edit Goal: {editingGoal.goal_name}</h3>
+                        <input
+                            type="text"
+                            value={editGoalName}
+                            onChange={e => setEditGoalName(e.target.value)}
+                            placeholder="Goal name"
+                        />
+                        <input
+                            type="number"
+                            value={editTargetAmount}
+                            onChange={e => setEditTargetAmount(e.target.value)}
+                            placeholder="Target amount"
+                        />
+                        <input
+                            type="date"
+                            value={editDeadline}
+                            onChange={e => setEditDeadline(e.target.value)}
+                        />
+                        <div className="edit-goal-buttons">
+                            <button className="save-btn" onClick={saveEditedGoal}>
+                                Save Changes
+                            </button>
+                            <button
+                                className="cancel-btn"
+                                onClick={() => setEditingGoal(null)}
+                            >
+                                Cancel
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
