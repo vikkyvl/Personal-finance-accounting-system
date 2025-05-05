@@ -1,9 +1,23 @@
 import { api } from './axios';
 
-export const fetchTransactions = (userId: string, type?: string, category?: string) =>
-    api.get(`/transactions/${userId}`, {
+export const fetchTransactions = (
+    userId: string,
+    type?: string,
+    category?: string,
+    token?: string
+) => {
+    return api.get(`/transactions/${userId}`, {
         params: { type, category },
+        headers: { Authorization: `Bearer ${token}` },
     });
+};
 
-export const createTransaction = (tx: any) =>
-    api.post('/transactions', tx);
+export const createTransaction = (
+    tx: any,
+    token?: string
+) => {
+    return api.post('/transactions', tx, {
+        headers: { Authorization: `Bearer ${token}` },
+    });
+};
+

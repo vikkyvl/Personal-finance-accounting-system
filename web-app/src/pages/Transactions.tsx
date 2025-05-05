@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { api } from '../api/axios';
+import { fetchTransactions, createTransaction } from '../api/transaction';
 import Topbar from '../components/Topbar';
 import '../styles/Transactions.css';
 
@@ -23,17 +23,11 @@ const Transactions = () => {
     const userId = localStorage.getItem('userId');
     const token = localStorage.getItem('token');
 
-    const fetchTransactions = async () => {
+    const fetchData = async () => {
         if (!userId || !token) return;
 
         try {
-            const res = await api.get(`/transactions/${userId}`, {
-                params: {
-                    type: filterType || undefined,
-                    category: filterCategory || undefined
-                },
-                headers: { Authorization: `Bearer ${token}` }
-            });
+            const res = await fetchTransactions(userId, filterType, filterCategory, token);
             setTransactions(res.data);
         } catch (err) {
             console.error('Fetch error:', err);
@@ -42,7 +36,7 @@ const Transactions = () => {
     };
 
     useEffect(() => {
-        fetchTransactions();
+        fetchData();
     }, [userId, token, filterType, filterCategory]);
 
     const handleAddTransaction = async () => {
@@ -52,18 +46,17 @@ const Transactions = () => {
         }
 
         try {
-            await api.post('/transactions', {
+            await createTransaction({
                 ...newTransaction,
                 user_id: userId,
-                amount: Number(newTransaction.amount)
-            }, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
+                amount: Number(newTransaction.amount),
+            }, token);
+
 
             setNewTransaction({});
             setShowForm(false);
             setError('');
-            fetchTransactions();
+            fetchData();
         } catch (err) {
             console.error(err);
             setError('Failed to add transaction');
