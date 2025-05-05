@@ -112,17 +112,14 @@ export class UserService {
       throw new RpcException('User not found');
     }
 
-    const token = uuidv4(); // генерація токену
+    const token = uuidv4();
     user.resetToken = token;
     user.resetTokenExpiry = addHours(new Date(), 1); // 1 година
 
     await this.userRepository.save(user);
 
-    // НАДСИЛАННЯ EMAIL (можемо зробити нижче)
     const resetLink = `http://localhost:3001/reset-password?token=${token}`;
 
-    // тут інтегруй Nodemailer, SendGrid або інше
-    // console.log(`Password reset link for ${email}: ${resetLink}`);
     await this.sendResetEmail(email, resetLink);
 
     return { message: 'Reset email sent' };
@@ -135,7 +132,7 @@ export class UserService {
       throw new RpcException('Invalid or expired token');
     }
 
-    user.password = newPassword; // Рекомендується: bcrypt.hash(newPassword, 10)
+    user.password = newPassword;
     user.resetToken = null;
     user.resetTokenExpiry = null;
 
@@ -151,10 +148,10 @@ export class UserService {
       secure: true,
       auth: {
         user: 'staff-base@ukr.net',
-        pass: '9no5mk9ONXolZjDb', // app password
+        pass: '9no5mk9ONXolZjDb',
       },
       tls: {
-        rejectUnauthorized: false, // ← додай це
+        rejectUnauthorized: false,
       },
     });
 
@@ -184,6 +181,5 @@ export class UserService {
       throw new Error('Failed to send password reset email');
     }
   }
-
 }
 

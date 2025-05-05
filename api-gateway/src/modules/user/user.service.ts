@@ -65,10 +65,10 @@ export class UserService {
   }
 
   async resetRequest(email: string) {
-    return this.send({ cmd: 'request_password_reset' }, email);
+    return this.send(patterns.USER.REQUEST_PASSWORD_RESET, { email });
   }
 
   async confirmPasswordResetByToken(token: string, newPassword: string) {
-    return this.send({ cmd: 'reset_password_confirm' }, { token, newPassword });
+    return this.send(patterns.USER.CONFIRM_PASSWORD_RESET, { token, newPassword });
   }
 }
