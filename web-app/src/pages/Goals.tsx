@@ -166,6 +166,14 @@ const Goals = () => {
                     <div className="goal-card" key={goal.id}>
                         <h4>{goal.goal_name}</h4>
                         <p>Progress: ${goal.current_amount} / ${goal.target_amount}</p>
+                        <div className="progress-bar-wrapper">
+                            <div
+                                className="progress-bar"
+                                style={{
+                                    width: `${Math.min((goal.current_amount / goal.target_amount) * 100, 100)}%`,
+                                }}
+                            ></div>
+                        </div>
                         <p>Deadline: {new Date(goal.deadline).toLocaleDateString()}</p>
                         {goal.status === 'in_progress' && (
                             <div className="goal-progress-form">
