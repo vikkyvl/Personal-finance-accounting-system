@@ -12,6 +12,12 @@ export const fetchTransactions = (
     });
 };
 
+export const fetchTransactionSummary = (userId: string, token: string) => {
+    return api.get(`/transactions/${userId}/summary`, {
+        headers: { Authorization: `Bearer ${token}` },
+    });
+};
+
 export const createTransaction = (
     tx: any,
     token?: string

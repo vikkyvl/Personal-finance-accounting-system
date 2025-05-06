@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { api } from '../api/axios';
+import { registerUser } from '../api/auth';
 import '../styles/Auth.css';
 
 const Register = () => {
@@ -16,8 +16,14 @@ const Register = () => {
             return;
         }
 
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            setError('Please enter a valid email address');
+            return;
+        }
+
         try {
-            await api.post('/users/register', { username, email, password });
+            await registerUser(username, email, password);
             navigate('/login');
         } catch (err: any) {
             console.error('Register error:', err);

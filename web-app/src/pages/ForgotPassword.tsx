@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { api } from '../api/axios';
+import { requestPasswordReset } from '../api/auth';
 import '../styles/Auth.css';
 
 const ForgotPassword = () => {
@@ -14,8 +14,8 @@ const ForgotPassword = () => {
         }
 
         try {
-            const res = await api.post('/users/reset-request', { email });
-            setMessage(res.data.message);
+            const data = await requestPasswordReset(email);
+            setMessage(data.message);
             setError('');
         } catch (err: any) {
             const msg =

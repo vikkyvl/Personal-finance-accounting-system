@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { api } from '../api/axios';
+import { resetPasswordConfirm } from '../api/auth';
 import '../styles/Auth.css';
 
 const ResetPassword = () => {
@@ -24,12 +24,8 @@ const ResetPassword = () => {
         }
 
         try {
-            const res = await api.post('/users/reset-confirm', {
-                token,
-                newPassword,
-            });
-
-            setSuccess(res.data.message);
+            const data = await resetPasswordConfirm(token, newPassword);
+            setSuccess(data.message);
             setError('');
 
             setTimeout(() => {

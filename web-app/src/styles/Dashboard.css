@@ -49,6 +49,8 @@ body {
     justify-content: space-between;
     align-items: center;
     margin-bottom: 30px;
+    max-width: 1280px;
+    width: 100%;
 }
 
 .balance-card {
@@ -254,4 +256,11 @@ body {
     height: 100%;
     transition: width 0.3s ease-in-out;
 }
+
+.dashboard-center {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+}
+
 

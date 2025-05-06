@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import { api } from '../api/axios';
+import { fetchGoals as getGoals, createGoal as addGoal, updateGoal as modifyGoal } from '../api/goal';
+import { createTransaction } from '../api/transaction';
 import Topbar from '../components/Topbar';
 import '../styles/Goals.css';
 
@@ -37,26 +38,26 @@ const Goals = () => {
 
     const fetchGoals = async () => {
         try {
-            const res = await api.get(`/goals/${userId}`);
-    
+            const res = await getGoals(userId!);
+
             const updatedGoals = res.data.map((goal: Goal) => {
                 const deadlineDate = new Date(goal.deadline);
                 const today = new Date();
-    
+
                 const currentAmount = Number(goal.current_amount);
                 const targetAmount = Number(goal.target_amount);
-    
+
                 if (currentAmount >= targetAmount) {
                     return { ...goal, status: 'completed' };
                 }
-    
+
                 if (deadlineDate < today && currentAmount < targetAmount) {
                     return { ...goal, status: 'failed' };
                 }
-    
+
                 return goal;
             });
-    
+
             setGoals(updatedGoals);
         } catch (err) {
             console.error('Error fetching goals:', err);
@@ -65,15 +66,15 @@ const Goals = () => {
 
     const createGoal = async () => {
         const amount = Number(targetAmount);
-    
+
         if (!goalName.trim() || amount <= 0 || !deadline) {
             alert('Please fill in all fields correctly!');
             return;
         }
-    
+
         try {
-            await api.post('/goals', {
-                user_id: userId,
+            await addGoal({
+                user_id: userId!,
                 goal_name: goalName,
                 target_amount: amount,
                 deadline,
@@ -102,11 +103,11 @@ const Goals = () => {
         const actualAmount = Math.min(amount, remainingAmount);
 
         try {
-            await api.put(`/goals/${goal.id}`, {
+            await modifyGoal(goal.id, {
                 current_amount: Number(goal.current_amount) + actualAmount,
             });
 
-            await api.post('/transactions', {
+            await createTransaction({
                 user_id: userId,
                 amount: actualAmount,
                 type: 'expense',
@@ -135,22 +136,22 @@ const Goals = () => {
 
     const saveEditedGoal = async () => {
         if (!editingGoal) return;
-    
+
         const updatedGoal = {
             goal_name: editGoalName,
             target_amount: Number(editTargetAmount),
             deadline: editDeadline,
         };
-    
+
         try {
-            await api.put(`/goals/${editingGoal.id}`, updatedGoal);
+            await modifyGoal(editingGoal.id, updatedGoal);
             setEditingGoal(null);
             fetchGoals();
         } catch (err) {
             console.error('Error updating goal:', err);
         }
     };
-    
+
     const toggleSection = (status: string) => {
         setExpanded(prev => ({ ...prev, [status]: !prev[status] }));
     };

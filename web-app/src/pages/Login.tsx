@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
-import { api } from '../api/axios';
+import { loginUserWithResponse } from '../api/auth';
 import '../styles/Auth.css';
 import Logo from '../icons/Logo.svg';
 
@@ -19,10 +19,14 @@ const Login = () => {
             return;
         }
 
-        try {
-            const res = await api.post('/users/login', { email, password });
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            setError('Please enter a valid email address');
+            return;
+        }
 
-            const { accessToken, userId } = res.data;
+        try {
+            const { accessToken, userId } = await loginUserWithResponse(email, password);
 
             if (!accessToken || !userId) {
                 setError('No accessToken or userId received');
@@ -36,10 +40,17 @@ const Login = () => {
             navigate('/dashboard');
         } catch (err: any) {
             console.error('Login error:', err);
-            const message =
-                err.response?.data?.message ||
-                (err.code === 'ERR_NETWORK' ? 'Network Error — check API connection' : 'Login failed');
-            setError(message);
+
+            if (err.response?.status === 404) {
+                setError("User not found. Would you like to register?");
+            } else {
+                const message =
+                    err.response?.data?.message ||
+                    (err.code === 'ERR_NETWORK'
+                        ? 'Network Error — check API connection'
+                        : 'Login failed');
+                setError(message);
+            }
         }
     };
 
