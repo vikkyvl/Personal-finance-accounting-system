@@ -3,6 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
 import { api } from '../api/axios';
 import '../styles/Auth.css';
+import Logo from '../icons/Logo.svg';
 
 const Login = () => {
     const { login } = useAuth();
@@ -63,7 +64,7 @@ const Login = () => {
                     setError('');
                 }}
             />
-            <button onClick={handleLogin}>Login</button>
+            <button onClick={handleLogin}>LOGIN</button>
             {error && <p className="error">{error}</p>}
             <p className="toggle-auth">
                 Don’t have an account? <Link to="/register">Register</Link>
@@ -72,7 +73,6 @@ const Login = () => {
                 Forgot your password?
                 <Link to="/forgot-password"> Reset it</Link>
             </p>
-
         </div>
     );
 };

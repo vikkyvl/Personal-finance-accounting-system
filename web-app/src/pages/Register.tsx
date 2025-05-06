@@ -58,7 +58,7 @@ const Register = () => {
                     setError('');
                 }}
             />
-            <button onClick={handleRegister}>Register</button>
+            <button onClick={handleRegister}>REGISTER</button>
             {error && <p className="auth-error">{error}</p>}
             <p>
                 Already have an account? <Link to="/login">Login</Link>

@@ -56,7 +56,7 @@ const ResetPassword = () => {
                     setError('');
                 }}
             />
-            <button onClick={handleReset}>Reset</button>
+            <button onClick={handleReset}>RESET</button>
             {success && <p style={{ color: 'green' }}>{success}</p>}
             {error && <p className="auth-error">{error}</p>}
         </div>

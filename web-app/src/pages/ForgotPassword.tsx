@@ -38,7 +38,7 @@ const ForgotPassword = () => {
                     setError('');
                 }}
             />
-            <button onClick={handleResetRequest}>Send reset link</button>
+            <button onClick={handleResetRequest}>SEND RESET LINK</button>
             {message && <p>{message}</p>}
             {error && <p className="auth-error">{error}</p>}
         </div>

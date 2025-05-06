@@ -124,7 +124,7 @@ const Dashboard = () => {
                     </div>
                     <div className="user-card">
                         <p><strong>{localStorage.getItem('email')}</strong></p>
-                        <span>Logged in</span>
+                        {/*<span>Logged in</span>*/}
                     </div>
                 </header>
 

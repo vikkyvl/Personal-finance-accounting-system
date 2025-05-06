@@ -60,17 +60,17 @@ body {
 }
 
 .balance-card p {
-    font-size: 1.4rem;  
-    font-weight: 650;   
+    font-size: 1.4rem;
+    font-weight: 650;
     margin: 0 0 10px 0;
-    color: #000;       
+    color: #000;
 }
 
 .balance-card h2 {
-    font-size: 2.1rem;     
-    font-weight: 700;     
-    color: #47CFEA;       
-    margin: 0;            
+    font-size: 2.1rem;
+    font-weight: 700;
+    color: #47CFEA;
+    margin: 0;
 }
 
 .user-card {
@@ -90,7 +90,7 @@ body {
     display: flex;
     flex-direction: column;
     gap: 30px;
-    width: 440px; 
+    width: 440px;
 }
 
 .right-column {
@@ -99,7 +99,7 @@ body {
     flex-direction: column;
     gap: 30px;
     width: 100%;
-    padding-left: 30px; 
+    padding-left: 30px;
 }
 
 .pie-and-lines {
@@ -125,9 +125,9 @@ body {
 .chart-box h4 {
     margin-top: 5px;
     margin-bottom: 15px;
-    color: #47CFEA;   
-    font-size: 18px;  
-    font-weight: 600; 
+    color: #47CFEA;
+    font-size: 18px;
+    font-weight: 600;
 }
 
 .chart-box.wide {
@@ -140,11 +140,11 @@ body {
 }
 
 .pie-chart-box svg {
-    margin-left: -30px; 
+    margin-left: -30px;
 }
 
 .line-chart-box {
-    width: 450px; 
+    width: 450px;
     height: 250px;
 }
 
@@ -158,8 +158,8 @@ body {
 }
 
 .goal-progress-box {
-    width: 100%; 
-    max-width: 400px; 
+    width: 100%;
+    max-width: 400px;
     min-height: 200px;
 }
 
@@ -167,16 +167,16 @@ body {
 .custom-legend {
     margin-top: 1rem;
     display: flex;
-    gap: 2rem; 
+    gap: 2rem;
     justify-content: center;
-    flex-wrap: wrap; 
+    flex-wrap: wrap;
 }
 
 .legend-column {
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
-    min-width: 120px; 
+    min-width: 120px;
 }
 
 .legend-item {
@@ -213,7 +213,7 @@ body {
     display: flex;
     flex-wrap: wrap;
     gap: 1.5rem;
-    margin-top: 2.5rem; 
+    margin-top: 2.5rem;
 }
 
 .spending-item {

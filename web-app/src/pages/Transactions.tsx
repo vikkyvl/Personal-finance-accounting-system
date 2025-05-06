@@ -81,12 +81,18 @@ const Transactions = () => {
                         <option value="income">Income</option>
                         <option value="expense">Expense</option>
                     </select>
-                    <input
-                        type="text"
-                        placeholder="Filter by category"
-                        value={filterCategory}
-                        onChange={e => setFilterCategory(e.target.value)}
-                    />
+
+                    <select value={filterCategory} onChange={e => setFilterCategory(e.target.value)}>
+                        <option value="">All Categories</option>
+                        <option value="salary">Salary</option>
+                        <option value="groceries">Groceries</option>
+                        <option value="entertainment">Entertainment</option>
+                        <option value="utilities">Utilities</option>
+                        <option value="transport">Transport</option>
+                        <option value="health">Health</option>
+                        <option value="goal">Goal</option>
+                        <option value="other">Other</option>
+                    </select>
                 </div>
 
                 {showForm && (
