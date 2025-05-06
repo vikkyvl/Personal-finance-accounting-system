@@ -9,14 +9,8 @@ import {
 } from 'recharts';
 import Topbar from '../components/Topbar';
 import { ResponsiveContainer } from 'recharts';
-import SalaryIcon from '../icons/Salary.svg';
-import EntertainmentIcon from '../icons/Entertainment.svg';
-import GroceriesIcon from '../icons/Groceries.svg';
-import HealthIcon from '../icons/Health.svg';
-import UtilitiesIcon from '../icons/Utilities.svg';
-import TransportIcon from '../icons/Transport.svg';
 
-const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
+const COLORS = ['#47CFEA', '#434C6B', '#5A422C', '#4E97A7', '#FA880D', '#D4BBA6', '#2B384C', '#0C8EF4'];
 
 interface Summary {
     income: number;
@@ -40,6 +34,8 @@ const Dashboard = () => {
     const [categories, setCategories] = useState<CategoryEntry[]>([]);
     const [timeseries, setTimeseries] = useState<TimeSeriesEntry[]>([]);
     const [sources, setSources] = useState<CategoryEntry[]>([]);
+    const [latestExpenses, setLatestExpenses] = useState<any[]>([]);
+    const [closestGoal, setClosestGoal] = useState<any>(null);
 
     const token = localStorage.getItem('token');
     const userId = localStorage.getItem('userId');
@@ -86,6 +82,34 @@ const Dashboard = () => {
             setCategories(Object.entries(grouped).map(([category, amount]) => ({ category, amount })));
             setTimeseries(Object.entries(timeline).map(([date, val]) => ({ date, ...val })));
             setSources(Object.entries(sourceGroup).map(([category, amount]) => ({ category, amount })));
+
+            const expenses = res.data
+                .filter((tx: any) => tx.type === 'expense')
+                .sort((a: any, b: any) => new Date(b.transaction_date).getTime() - new Date(a.transaction_date).getTime())
+                .slice(0, 6)
+                .map((tx: any) => ({
+                    ...tx,
+                    amount: Number(tx.amount),
+                    category: tx.category.charAt(0).toUpperCase() + tx.category.slice(1).toLowerCase()
+                }));
+            
+            setLatestExpenses(expenses);
+
+            api.get(`/goals/${userId}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            }).then(res => {
+                const goals = res.data;
+        
+                const upcomingGoal = goals
+                    .filter((goal: any) => new Date(goal.deadline) >= new Date()) 
+                    .sort((a: any, b: any) =>
+                        new Date(a.deadline).getTime() - new Date(b.deadline).getTime()
+                    )[0]; 
+        
+                if (upcomingGoal) {
+                    setClosestGoal(upcomingGoal);
+                }
+            });
         });
     }, [userId, token]);
 
@@ -96,7 +120,7 @@ const Dashboard = () => {
                 <header className="header">
                     <div className="balance-card">
                         <p>Available Balance</p>
-                        <h2>${summary.balance.toFixed(2)}</h2>
+                        <h2 style={{ textAlign: 'left' }}>${summary.balance.toFixed(2)}</h2>
                     </div>
                     <div className="user-card">
                         <p><strong>{localStorage.getItem('email')}</strong></p>
@@ -105,131 +129,215 @@ const Dashboard = () => {
                 </header>
 
                 <section className="charts-section">
-                                    <div className="chart-box">
-                        <h4>Spendings</h4>
-                        <PieChart width={250} height={250}>
-                            <Pie data={categories} dataKey="amount" nameKey="category" outerRadius={80} label>
-                                {categories.map((_, index) => (
-                                    <Cell key={index} fill={COLORS[index % COLORS.length]} />
-                                ))}
-                            </Pie>
-                        </PieChart>
+                    <div className="left-column">
+                        {closestGoal && (
+                            <div className="chart-box goal-progress-box">
+                                <p style={{ 
+                                    margin: '0', 
+                                    fontSize: '1.25rem', 
+                                    fontWeight: '700', 
+                                    color: '#47cfea' 
+                                }}>
+                                    {Math.min(
+                                        (Number(closestGoal.current_amount) / Number(closestGoal.target_amount)) * 100,
+                                        100
+                                    ).toFixed(0)}%
+                                </p>
+                                
+                                <h4 style={{ margin: '0.3rem 0',  color: '#000'}}>{closestGoal.goal_name}</h4>
+                                <p style={{ fontSize: '0.85rem', color: '#888'}}>Your current goal</p>
+                                <p style={{ fontWeight: '600', fontSize: '1rem', color: '#47cfea' }}>
+                                    ${closestGoal.current_amount.toLocaleString()}
+                                    <span style={{ color: '#ccc' }}> / {closestGoal.target_amount.toLocaleString()}</span>
+                                </p>
 
-                        <div className="custom-legend">
-                            <div className="legend-column">
-                                {categories.slice(0, Math.ceil(categories.length / 2)).map((entry, index) => (
-                                    <div key={`item-left-${index}`} className="legend-item">
-                                        <span
-                                            className="legend-color"
-                                            style={{ backgroundColor: COLORS[index % COLORS.length] }}
-                                        ></span>
-                                        <span className="legend-text">{entry.category}</span>
-                                    </div>
-                                ))}
+                                <div className="progress-bar-wrapper">
+                                    <div
+                                        className="progress-bar-fill"
+                                        style={{
+                                            width: `${Math.min(
+                                                (Number(closestGoal.current_amount) / Number(closestGoal.target_amount)) * 100,
+                                                100
+                                            ).toFixed(0)}%`
+                                        }}
+                                    ></div>
+                                </div>
                             </div>
-                            <div className="legend-column">
-                                {categories.slice(Math.ceil(categories.length / 2)).map((entry, index) => {
-                                    const colorIndex = index + Math.ceil(categories.length / 2);
-                                    return (
-                                        <div key={`item-right-${index}`} className="legend-item">
-                                            <span
-                                                className="legend-color"
-                                                style={{ backgroundColor: COLORS[colorIndex % COLORS.length] }}
-                                            ></span>
-                                            <span className="legend-text">{entry.category}</span>
+                        )}
+
+                        <div className="chart-box last-spendings-box">
+                            <h4>Last Spendings</h4>
+                            <div className="spendings-list">
+
+                                {latestExpenses
+                                    .filter(spending => spending.category === 'Salary')
+                                    .map((spending, idx) => (
+                                        <div className="spending-item" key={`salary-${idx}`}>
+                                            <img src="/icons/Salary.svg" alt="Salary" className="spending-icon" />
+                                            <div>
+                                                <p className="spending-name">Salary</p>
+                                                <p className="spending-amount">${Number(spending.amount).toFixed(2)}</p>
+                                            </div>
                                         </div>
-                                    );
-                                })}
+                                    ))}
+
+                                {latestExpenses
+                                    .filter(spending => spending.category === 'Entertainment')
+                                    .map((spending, idx) => (
+                                        <div className="spending-item" key={`entertainment-${idx}`}>
+                                            <img src="/icons/Entertainment.svg" alt="Entertainment" className="spending-icon" />
+                                            <div>
+                                                <p className="spending-name">Entertainment</p>
+                                                <p className="spending-amount">${Number(spending.amount).toFixed(2)}</p>
+                                            </div>
+                                        </div>
+                                    ))}
+
+                                {latestExpenses
+                                    .filter(spending => spending.category === 'Groceries')
+                                    .map((spending, idx) => (
+                                        <div className="spending-item" key={`groceries-${idx}`}>
+                                            <img src="/icons/Groceries.svg" alt="Groceries" className="spending-icon" />
+                                            <div>
+                                                <p className="spending-name">Groceries</p>
+                                                <p className="spending-amount">${Number(spending.amount).toFixed(2)}</p>
+                                            </div>
+                                        </div>
+                                    ))}
+
+                                {latestExpenses
+                                    .filter(spending => spending.category === 'Health')
+                                    .map((spending, idx) => (
+                                        <div className="spending-item" key={`health-${idx}`}>
+                                            <img src="/icons/Health.svg" alt="Health" className="spending-icon" />
+                                            <div>
+                                                <p className="spending-name">Health</p>
+                                                <p className="spending-amount">${Number(spending.amount).toFixed(2)}</p>
+                                            </div>
+                                        </div>
+                                    ))}
+
+                                {latestExpenses
+                                    .filter(spending => spending.category === 'Utilities')
+                                    .map((spending, idx) => (
+                                        <div className="spending-item" key={`utilities-${idx}`}>
+                                            <img src="/icons/Utilities.svg" alt="Utilities" className="spending-icon" />
+                                            <div>
+                                                <p className="spending-name">Utilities</p>
+                                                <p className="spending-amount">${Number(spending.amount).toFixed(2)}</p>
+                                            </div>
+                                        </div>
+                                    ))}
+
+                                {latestExpenses
+                                    .filter(spending => spending.category === 'Transport')
+                                    .map((spending, idx) => (
+                                        <div className="spending-item" key={`transport-${idx}`}>
+                                            <img src="/icons/Transport.svg" alt="Transport" className="spending-icon" />
+                                            <div>
+                                                <p className="spending-name">Transport</p>
+                                                <p className="spending-amount">${Number(spending.amount).toFixed(2)}</p>
+                                            </div>
+                                        </div>
+                                    ))}
+
                             </div>
+                        </div>
+
+                        <div className="chart-box bar-chart-box">
+                            <h4>Income Source</h4>
+                            <ResponsiveContainer width="100%" height={250}>
+                                <BarChart data={sources}>
+                                    <XAxis dataKey="category" />
+                                    <YAxis />
+                                    <Tooltip />
+                                    <Legend />
+                                    <Bar dataKey="amount" fill="#4E97A7" />
+                                </BarChart>
+                            </ResponsiveContainer>
                         </div>
                     </div>
 
-                    <div className="chart-box">
-                        <h4>Income Over Time</h4>
-                        <LineChart width={300} height={200} data={timeseries}>
-                            <XAxis dataKey="date" /><YAxis /><Tooltip /><Legend />
-                            <Line type="monotone" dataKey="income" stroke="#00C49F" />
-                        </LineChart>
-                    </div>
+                    <div className="right-column">
+                        <div className="top-graphs">
+                            <div className="pie-and-lines">
+                                <div className="chart-box pie-chart-box">
+                                    <h4>Spendings</h4>
+                                    <PieChart width={350} height={392}>
+                                        <Pie data={categories} dataKey="amount" nameKey="category" outerRadius={120} label>
+                                            {categories.map((_, index) => (
+                                                <Cell key={index} fill={COLORS[index % COLORS.length]} />
+                                            ))}
+                                        </Pie>
+                                    </PieChart>
 
-                    <div className="chart-box wide">
-                        <h4>Income & Expense Over Time</h4>
-                        <LineChart width={500} height={250} data={timeseries}>
-                            <CartesianGrid strokeDasharray="3 3" />
-                            <XAxis dataKey="date" /><YAxis /><Tooltip /><Legend />
-                            <Line type="monotone" dataKey="income" stroke="#00C49F" />
-                            <Line type="monotone" dataKey="expense" stroke="#FF8042" />
-                        </LineChart>
-                    </div>
+                                    <div className="custom-legend">
+                                        <div className="legend-column">
+                                            {categories.slice(0, Math.ceil(categories.length / 2)).map((entry, index) => (
+                                                <div key={`item-left-${index}`} className="legend-item">
+                                                    <span
+                                                        className="legend-color"
+                                                        style={{ backgroundColor: COLORS[index % COLORS.length] }}
+                                                    ></span>
+                                                    <span className="legend-text">{entry.category}</span>
+                                                </div>
+                                            ))}
+                                        </div>
+                                        <div className="legend-column">
+                                            {categories.slice(Math.ceil(categories.length / 2)).map((entry, index) => {
+                                                const colorIndex = index + Math.ceil(categories.length / 2);
+                                                return (
+                                                    <div key={`item-right-${index}`} className="legend-item">
+                                                        <span
+                                                            className="legend-color"
+                                                            style={{ backgroundColor: COLORS[colorIndex % COLORS.length] }}
+                                                        ></span>
+                                                        <span className="legend-text">{entry.category}</span>
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
+                                </div>
 
-                    <div className="chart-box">
-                        <h4>Income Source</h4>
-                        <ResponsiveContainer width="100%" height={250}>
-                            <BarChart data={sources}>
-                                <XAxis dataKey="category" />
-                                <YAxis />
-                                <Tooltip />
-                                <Legend />
-                                <Bar dataKey="amount" fill="#8884d8" />
-                            </BarChart>
-                        </ResponsiveContainer>
+                                <div className="line-charts">
+                                    <div className="chart-box line-chart-box">
+                                        <h4>Income Over Time</h4>
+                                        <LineChart width={450} height={200} data={timeseries}>
+                                            <XAxis dataKey="date" /><YAxis /><Tooltip /><Legend />
+                                            <Line type="monotone" dataKey="income" stroke="#00C49F" />
+                                        </LineChart>
+                                    </div>
+                                    
+                                    <div className="chart-box line-chart-box">
+                                        <h4>Spendings Over Time</h4>
+                                        <LineChart width={450} height={200} data={timeseries}>
+                                            <XAxis dataKey="date" />
+                                            <YAxis />
+                                            <Tooltip />
+                                            <Legend />
+                                            <Line type="monotone" dataKey="expense" stroke="#FF8042" />
+                                        </LineChart>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="chart-box wide">
+                            <h4>Income & Expense Over Time</h4>
+                            <LineChart width={800} height={250} data={timeseries}>
+                                <CartesianGrid strokeDasharray="3 3" />
+                                <XAxis dataKey="date" /><YAxis /><Tooltip /><Legend />
+                                <Line type="monotone" dataKey="income" stroke="#00C49F" />
+                                <Line type="monotone" dataKey="expense" stroke="#FF8042" />
+                            </LineChart>
+                        </div>
                     </div>
                 </section>
-
-                <section className="last-spendings">
-                    <h4>Last Spendings</h4>
-                    <div className="spendings-list">
-                        <div className="spending-item">
-                            <img src={SalaryIcon} alt="Salary" className="spending-icon" />
-                            <div>
-                                <p className="spending-name">Salary</p>
-                                <p className="spending-amount">$2400.00</p>
-                            </div>
-                        </div>
-                        <div className="spending-item">
-                            <img src={EntertainmentIcon} alt="Entertainment" className="spending-icon" />
-                            <div>
-                                <p className="spending-name">Entertainment</p>
-                                <p className="spending-amount">$150.00</p>
-                            </div>
-                        </div>
-                        <div className="spending-item">
-                            <img src={GroceriesIcon} alt="Groceries" className="spending-icon" />
-                            <div>
-                                <p className="spending-name">Groceries</p>
-                                <p className="spending-amount">$95.00</p>
-                            </div>
-                        </div>
-                        <div className="spending-item">
-                            <img src={HealthIcon} alt="Health" className="spending-icon" />
-                            <div>
-                                <p className="spending-name">Health</p>
-                                <p className="spending-amount">$200.00</p>
-                            </div>
-                        </div>
-                        <div className="spending-item">
-                            <img src={UtilitiesIcon} alt="Utilities" className="spending-icon" />
-                            <div>
-                                <p className="spending-name">Utilities</p>
-                                <p className="spending-amount">$120.00</p>
-                            </div>
-                        </div>
-                        <div className="spending-item">
-                            <img src={TransportIcon} alt="Transport" className="spending-icon" />
-                            <div>
-                                <p className="spending-name">Transport</p>
-                                <p className="spending-amount">$50.00</p>
-                            </div>
-                        </div>
-                    </div>
-                </section>
+                
             </main>
         </>
     );
 };
 
 export default Dashboard;
-
-
-
-
