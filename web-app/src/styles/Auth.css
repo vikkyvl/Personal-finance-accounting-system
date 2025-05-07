@@ -86,6 +86,46 @@
     color: #333;
 }
 
+.auth-container input,
+.password-wrapper input {
+    width: 100%;
+    padding: 0.75rem;
+    font-size: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    outline: none;
+    transition: border-color 0.3s;
+    box-sizing: border-box;
+}
+
+.password-wrapper {
+    position: relative;
+    width: 100%;
+    margin-bottom: 1rem;
+}
+
+.toggle-password,
+.toggle-eye {
+    position: absolute;
+    right: 0.75rem;
+    top: 0.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 1.5rem;
+    width: 1.5rem;
+    font-size: 1.2rem;
+    color: #666;
+    cursor: pointer;
+}
+
+
+
+
+
+
+
+
 
 
 

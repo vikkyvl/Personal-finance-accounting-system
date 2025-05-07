@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import {JSX, useState} from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
 import { loginUserWithResponse } from '../api/auth';
+import { Eye, EyeOff } from 'lucide-react';
 import '../styles/Auth.css';
 import Logo from '../icons/Logo.svg';
 
@@ -12,6 +13,7 @@ const Login = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
 
     const handleLogin = async () => {
         if (!email || !password) {
@@ -36,20 +38,22 @@ const Login = () => {
             login(accessToken);
             localStorage.setItem('email', email);
             localStorage.setItem('userId', userId);
-
             navigate('/dashboard');
         } catch (err: any) {
             console.error('Login error:', err);
 
-            if (err.response?.status === 404) {
-                setError("User not found. Would you like to register?");
+            const status = err.response?.status;
+
+            if (status === 404) {
+                setError('User with this email does not exist. Please register.');
+            } else if (status === 401) {
+                setError('Invalid password. Please try again.');
+            } else if (status === 400) {
+                setError('Incorrect email or password format.');
+            } else if (err.code === 'ERR_NETWORK') {
+                setError('Network Error — check API connection');
             } else {
-                const message =
-                    err.response?.data?.message ||
-                    (err.code === 'ERR_NETWORK'
-                        ? 'Network Error — check API connection'
-                        : 'Login failed');
-                setError(message);
+                setError('Login failed. Please try again later.');
             }
         }
     };
@@ -66,15 +70,20 @@ const Login = () => {
                     setError('');
                 }}
             />
-            <input
-                type="password"
-                placeholder="Password"
-                value={password}
-                onChange={e => {
-                    setPassword(e.target.value);
-                    setError('');
-                }}
-            />
+            <div className="password-wrapper">
+                <input
+                    type={showPassword ? "text" : "password"}
+                    placeholder="Password"
+                    value={password}
+                    onChange={e => {
+                        setPassword(e.target.value);
+                        setError('');
+                    }}
+                />
+                <span className="toggle-eye" onClick={() => setShowPassword(!showPassword)}>
+                    {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                </span>
+            </div>
             <button onClick={handleLogin}>LOGIN</button>
             {error && <p className="error">{error}</p>}
             <p className="toggle-auth">

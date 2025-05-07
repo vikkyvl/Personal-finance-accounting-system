@@ -13,15 +13,27 @@ const ForgotPassword = () => {
             return;
         }
 
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            setError('Please enter a valid email address');
+            return;
+        }
+
         try {
             const data = await requestPasswordReset(email);
             setMessage(data.message);
             setError('');
         } catch (err: any) {
-            const msg =
-                err.response?.data?.message ||
-                (err.code === 'ERR_NETWORK' ? 'Network Error' : 'Reset failed');
-            setError(msg);
+            const status = err.response?.status;
+
+            if (status === 404) {
+                setError('User with this email does not exist');
+            } else if (err.code === 'ERR_NETWORK') {
+                setError('Network Error');
+            } else {
+                setError('Reset failed. Please try again.');
+            }
+
             setMessage('');
         }
     };

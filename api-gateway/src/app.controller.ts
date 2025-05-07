@@ -1,4 +1,12 @@
-import { Controller, Post, Body, Inject } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  Inject,
+  NotFoundException,
+  UnauthorizedException,
+  InternalServerErrorException, ConflictException
+} from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 
 @Controller('users')
@@ -7,30 +15,67 @@ export class AppController {
 
   @Post('register')
   async register(@Body() createUserDto: any) {
-    console.log('Sending message to user-service:', createUserDto);
     try {
-      const response = await this.userService
-        .send({ cmd: 'create_user' }, createUserDto)  
-        .toPromise();
+      return await this.userService
+          .send({ cmd: 'create_user' }, createUserDto)
+          .toPromise();
+    } catch (error: any) {
+      const msg = error.message || error?.response?.message;
 
-      console.log('Received response from user-service:', response);
-      return response;
-    } catch (error) {
-      console.error('Error during registration:', error.message || error);
-      throw error;
+      if (msg === 'User already exists') {
+        throw new ConflictException(msg);
+      }
+
+      throw new InternalServerErrorException('Registration failed');
     }
   }
 
   @Post('login')
   async login(@Body() loginDto: { email: string; password: string }) {
-    console.log('Forwarding login request to user-service:', loginDto);
-    return this.userService.send({ cmd: 'login_user' }, loginDto).toPromise();
+    try {
+      return await this.userService.send({ cmd: 'login_user' }, loginDto).toPromise();
+    } catch (err: any) {
+      const message = err.message || err?.response?.message;
+
+      if (message === 'User not found') {
+        throw new NotFoundException(message);
+      }
+      if (message === 'Invalid password') {
+        throw new UnauthorizedException(message);
+      }
+
+      throw new InternalServerErrorException('Login failed');
+    }
   }
 
   @Post('reset-request')
   async resetRequest(@Body() body: { email: string }) {
     console.log('Sending reset request for email:', body.email);
-    return this.userService.send({ cmd: 'request_password_reset' }, body.email).toPromise();
+
+    try {
+      const result = await this.userService
+          .send({ cmd: 'request_password_reset' }, body.email)
+          .toPromise();
+
+      console.log('Reset result:', result);
+      return result;
+    } catch (err: any) {
+      console.error('FULL ERROR:', JSON.stringify(err, null, 2));
+
+      const message =
+          err?.response?.data?.message ||
+          err?.response?.message ||
+          err?.message ||
+          'Unknown error';
+
+      console.error('Reset request error:', message);
+
+      if (message === 'User not found') {
+        throw new NotFoundException(message);
+      }
+
+      throw new InternalServerErrorException('Reset request failed');
+    }
   }
 
   @Post('reset-confirm')

@@ -1,4 +1,4 @@
-import { Injectable, Logger, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import {ConflictException, Injectable, Logger, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { RpcException } from '@nestjs/microservices';
 import { Repository } from 'typeorm';
@@ -15,47 +15,59 @@ export class UserService {
   private readonly logger = new Logger(UserService.name);
 
   constructor(
-    private readonly authService: AuthService,
-    @InjectRepository(User)
-    private readonly userRepository: Repository<User>,
-  ) {}
-
-  async createUser(dto: UserDTO) {
-    //this.logger.log(`Creating user: ${JSON.stringify(dto)}`);
-
-    const { email, username, role = 'user' } = dto; 
-    const userPassword = dto.password || uuidv4().slice(0, 8);
-
-    //console.log('Creating user with role:', role);
-
-    const userData = {
-        email,
-        username,
-        password: userPassword,
-        role,  
-    };
-
-    //console.log('Saving user:', userData);
-
-    const user = this.userRepository.create(userData);
-    await this.userRepository.save(user);
-
-    //console.log('User created:', user);
-
-    return this.authService.generateTokens({
-        member_id: user.id,
-        role: user.role,
-    });
+      private readonly authService: AuthService,
+      @InjectRepository(User)
+      private readonly userRepository: Repository<User>,
+  ) {
   }
 
-  async login(dto: { email: string; password: string }) {
+  async createUser(dto: UserDTO) {
+    const { email, username, role = 'user' } = dto;
+    const userPassword = dto.password || uuidv4().slice(0, 8);
+
+    const userData = {
+      email,
+      username,
+      password: userPassword,
+      role,
+    };
+
+    try {
+      const user = this.userRepository.create(userData);
+      await this.userRepository.save(user);
+      await this.sendWelcomeEmail(email);
+
+      return this.authService.generateTokens({
+        member_id: user.id,
+        role: user.role,
+      });
+    } catch (error: any) {
+      if (error.code === '23505') {
+        throw new RpcException('User already exists');
+      }
+      throw new RpcException('Unexpected error');
+    }
+  }
+
+
+async login(dto: { email: string; password: string }) {
     this.logger.log(`Attempting login for: ${dto.email}`);
 
-    const user = await this.userRepository.findOne({ where: { email: dto.email } });
+    const user = await this.userRepository.findOne({where: {email: dto.email}});
 
-    if (!user || user.password !== dto.password) {
-      this.logger.warn(`Invalid credentials for ${dto.email}`);
-      throw new UnauthorizedException('Invalid email or password');
+    if (!user) {
+      this.logger.warn(`User not found: ${dto.email}`);
+      throw new RpcException('User not found');
+    }
+
+    if (user.password !== dto.password) {
+      this.logger.warn(`Invalid password for: ${dto.email}`);
+      throw new RpcException('Invalid password');
+    }
+
+    if (user.password !== dto.password) {
+      this.logger.warn(`Invalid password for: ${dto.email}`);
+      throw new UnauthorizedException('Incorrect password');
     }
 
     const tokens = await this.authService.generateTokens({
@@ -71,7 +83,7 @@ export class UserService {
 
 
   async findUserById(id: string) {
-    return this.userRepository.findOne({ where: { id } });
+    return this.userRepository.findOne({where: {id}});
   }
 
   async updateUser(id: string, dto: UserDTO) {
@@ -95,7 +107,7 @@ export class UserService {
   }
 
   async findUserByEmail(email: string) {
-    return this.userRepository.findOne({ where: { email } });
+    return this.userRepository.findOne({where: {email}});
   }
 
   async resetPassword(email: string) {
@@ -103,11 +115,12 @@ export class UserService {
     if (!user) {
       throw new RpcException('User not found');
     }
-    return this.userRepository.save({ ...user, password: '123456' });
+    return this.userRepository.save({...user, password: '123456'});
   }
 
   async requestPasswordReset(email: string) {
     const user = await this.findUserByEmail(email);
+
     if (!user) {
       throw new RpcException('User not found');
     }
@@ -126,7 +139,7 @@ export class UserService {
   }
 
   async resetPasswordConfirm(token: string, newPassword: string) {
-    const user = await this.userRepository.findOne({ where: { resetToken: token } });
+    const user = await this.userRepository.findOne({where: {resetToken: token}});
 
     if (!user || !user.resetTokenExpiry || user.resetTokenExpiry < new Date()) {
       throw new RpcException('Invalid or expired token');
@@ -138,11 +151,11 @@ export class UserService {
 
     await this.userRepository.save(user);
 
-    return { message: 'Password reset successful' };
+    return {message: 'Password reset successful'};
   }
 
-  async sendResetEmail(to: string, link: string) {
-    const transporter = nodemailer.createTransport({
+  private createTransporter() {
+    return nodemailer.createTransport({
       host: 'smtp.ukr.net',
       port: 465,
       secure: true,
@@ -154,7 +167,10 @@ export class UserService {
         rejectUnauthorized: false,
       },
     });
+  }
 
+  async sendResetEmail(to: string, link: string) {
+    const transporter = this.createTransporter();
 
     try {
       const info = await transporter.sendMail({
@@ -162,24 +178,47 @@ export class UserService {
         to,
         subject: 'Password Reset Request',
         html: `
-        <div style="font-family: Arial, sans-serif; color: #333;">
-          <h2>Password Reset</h2>
-          <p>You requested to reset your password.</p>
-          <p>Click the link below to proceed:</p>
-          <p>
-            <a href="${link}" style="color: #00c49f;">Reset Password</a>
-          </p>
-          <br/>
-          <p>If you didn’t request this, please ignore this email.</p>
-        </div>
-      `,
+          <div style="font-family: Arial, sans-serif; color: #333;">
+            <h2>Password Reset</h2>
+            <p>You requested to reset your password.</p>
+            <p>Click the link below to proceed:</p>
+            <p>
+              <a href="${link}" style="color: #00c49f;">Reset Password</a>
+            </p>
+            <br/>
+            <p>If you didn’t request this, please ignore this email.</p>
+          </div>
+        `,
       });
 
-      console.log('Email sent:', info.messageId);
+      console.log('Reset email sent:', info.messageId);
     } catch (error) {
-      console.error('Failed to send email:', error);
+      console.error('Failed to send reset email:', error);
       throw new Error('Failed to send password reset email');
     }
   }
-}
 
+  async sendWelcomeEmail(to: string) {
+    const transporter = this.createTransporter();
+
+    try {
+      const info = await transporter.sendMail({
+        from: '"Finance App" <staff-base@ukr.net>',
+        to,
+        subject: 'Welcome to Finance App!',
+        html: `
+          <div style="font-family: Arial, sans-serif; color: #333;">
+            <h2>Welcome!</h2>
+            <p>Thank you for registering in our Finance App.</p>
+            <p>We’re glad to have you on board!</p>
+          </div>
+        `,
+      });
+
+      console.log('Welcome email sent:', info.messageId);
+    } catch (error) {
+      console.error('Failed to send welcome email:', error);
+      throw new Error('Failed to send welcome email');
+    }
+  }
+}

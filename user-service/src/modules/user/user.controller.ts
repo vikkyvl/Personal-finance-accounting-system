@@ -73,7 +73,7 @@ export class UserController {
   }
 
   @MessagePattern({ cmd: 'request_password_reset' })
-  async requestPasswordReset(email: string) {
+  async handleResetRequest(email: string) {
     return this.userService.requestPasswordReset(email);
   }
 
